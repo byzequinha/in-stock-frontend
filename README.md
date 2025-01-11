@@ -132,8 +132,6 @@ git commit -m "Adicionado README.md"
 git push origin main
 ```
 
-Pronto! Agora seu projeto terá uma apresentação profissional no GitHub. 🚀✨
-
 ## Autor
 
 - [José Francisco Moreira Neto](https://github.com/byzequinha)
