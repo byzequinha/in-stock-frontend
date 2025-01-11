@@ -110,10 +110,6 @@ src/
 - Implementar funcionalidades de CRUD para produtos e usuários
 - Testes automatizados no frontend e backend
 
-## 📝 Licença
-
-Este projeto é open-source e está sob a licença [MIT](LICENSE).
-
 
 ## Autor
 
@@ -123,8 +119,7 @@ Este projeto é open-source e está sob a licença [MIT](LICENSE).
 
 ---
 
-## Licença
+## 📝 Licença
 
-Todos os Direitos Reservados
+Este projeto é open-source e está sob a licença [MIT](LICENSE).
 
-[MIT](https://choosealicense.com/licenses/mit/)
