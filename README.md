@@ -114,23 +114,6 @@ src/
 
 Este projeto é open-source e está sob a licença [MIT](LICENSE).
 
----
-
-Contribuições são bem-vindas! Para sugestões ou dúvidas, entre em contato ou abra uma issue.
-```
-
----
-
-### Como usar
-1. Crie um arquivo chamado `README.md` na raiz do projeto.
-2. Copie e cole o conteúdo acima no arquivo.
-3. Suba o arquivo junto com o projeto no GitHub:
-
-```bash
-git add README.md
-git commit -m "Adicionado README.md"
-git push origin main
-```
 
 ## Autor
 
