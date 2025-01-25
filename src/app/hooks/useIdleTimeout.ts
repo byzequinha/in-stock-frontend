@@ -1,38 +1,46 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 
 interface UseIdleTimeoutProps {
-    timeout: number; // Tempo limite em milissegundos
-    onTimeout: () => void; // Função chamada ao atingir o limite
+  onTimeout: () => void;
+  timeout: number; // Tempo limite em milissegundos
 }
 
-const useIdleTimeout = ({ timeout, onTimeout }: UseIdleTimeoutProps) => {
-    const timerRef = useRef<NodeJS.Timeout | null>(null);
+export const useIdleTimeout = ({ onTimeout, timeout }: UseIdleTimeoutProps) => {
+  const timerRef = useRef<number | null>(null);
 
-    const resetTimer = () => {
-        if (timerRef.current) {
-            clearTimeout(timerRef.current);
-        }
-        timerRef.current = setTimeout(onTimeout, timeout);
+  // Define a função resetTimer com useCallback para estabilizar sua referência
+  const resetTimer = useCallback(() => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+    }
+    timerRef.current = window.setTimeout(() => {
+      onTimeout();
+    }, timeout);
+  }, [onTimeout, timeout]);
+
+  useEffect(() => {
+    // Inicializa o timer
+    resetTimer();
+
+    const handleUserActivity = () => {
+      resetTimer(); // Reseta o timer em atividade do usuário
     };
 
-    useEffect(() => {
-        const events = ['mousemove', 'keydown', 'click'];
+    // Adiciona listeners para eventos de atividade do usuário
+    window.addEventListener('mousemove', handleUserActivity);
+    window.addEventListener('keydown', handleUserActivity);
 
-        const handleActivity = () => resetTimer();
+    return () => {
+      // Remove os listeners e limpa o timer quando o componente é desmontado
+      window.removeEventListener('mousemove', handleUserActivity);
+      window.removeEventListener('keydown', handleUserActivity);
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
+    };
+  }, [resetTimer]);
 
-        events.forEach((event) => window.addEventListener(event, handleActivity));
-
-        resetTimer(); // Inicia o timer ao montar
-
-        return () => {
-            if (timerRef.current) {
-                clearTimeout(timerRef.current);
-            }
-            events.forEach((event) => window.removeEventListener(event, handleActivity));
-        };
-    }, [timeout, onTimeout]);
-
-    return resetTimer;
+  return {
+    resetTimer, // Caso você queira resetar o timer manualmente
+  };
 };
-
-export default useIdleTimeout;

@@ -1,23 +1,21 @@
-"use client";
+import Image from 'next/image';
 
 interface LogoProps {
-    width?: number;
-    height?: number;
+  width?: number;
+  height?: number;
+  className?: string;
 }
 
-const Logo: React.FC<LogoProps> = ({ width = 60, height = 48 }) => {
-    return (
-        <img
-            src="/assets/logo.png"
-            alt="Logo do InStock"
-            className="block"
-            style={{ width: `${width}px`, height: `${height}px` }}
-            onError={(e) => {
-                e.currentTarget.src = '/fallback-logo.png'; // Substitua por um logo padrão, se necessário.
-                e.currentTarget.alt = 'Logo não encontrado';
-            }}
-        />
-    );
-};
+const Logo = ({ width = 180, height = 143, className }: LogoProps) => (
+  <div className={`relative ${className || ''}`} style={{ width, height }}>
+    <Image
+      src="/assets/logo.png"
+      alt="Logo InStock"
+      fill
+      priority
+      style={{ objectFit: 'contain' }}
+    />
+  </div>
+);
 
 export default Logo;
