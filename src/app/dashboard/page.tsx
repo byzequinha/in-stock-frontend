@@ -1,12 +1,31 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
-import { useEffect, useState, useCallback } from 'react';
-import axios from 'axios';
+import Logo from '@/app/components/Logo';
 import { useAuthStore } from '@/stores/useAuthStore';
-import Logo from '../components/Logo';
-import { AiOutlineHome, AiOutlineSetting, AiOutlineUser, AiOutlineLogout } from 'react-icons/ai';
-import { useIdleTimeout } from '../hooks/useIdleTimeout';
+import axios from 'axios';
+import { useRouter } from 'next/navigation';
+import { useCallback, useEffect, useState } from 'react';
+import {
+  AiOutlineDownload,
+  AiOutlineHome,
+  AiOutlineLogout,
+  AiOutlineSetting,
+  AiOutlineUpload,
+  AiOutlineUser,
+} from 'react-icons/ai';
+import { GrAlert } from 'react-icons/gr';
+
+interface Product {
+  name: string;
+  quantity: number;
+  created_at: string;
+}
+
+interface Alert {
+  name: string;
+  quantity: number;
+  min_stock: number;
+}
 
 interface User {
   nome: string;
@@ -14,161 +33,221 @@ interface User {
   last_login: string;
 }
 
-interface Product {
-  id: number;
-  name: string;
-  price: number | string;
-  stock: number;
-  min_stock: number;
-}
-
 const Dashboard = () => {
   const router = useRouter();
-  const [products, setProducts] = useState<Product[]>([]);
-  const [user, setUser] = useState<User | null>(null);
-  const [loadingProducts, setLoadingProducts] = useState(true);
-  const [loadingUser, setLoadingUser] = useState(true);
   const { token, setToken } = useAuthStore();
+  const [entries, setEntries] = useState<Product[]>([]);
+  const [exits, setExits] = useState<Product[]>([]);
+  const [alerts, setAlerts] = useState<Alert[]>([]);
+  const [user, setUser] = useState<User | null>(null);
+  const [loadingUser, setLoadingUser] = useState(true);
 
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001';
+  const API_BASE_URL =
+    process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001';
 
   const handleLogout = useCallback(() => {
-    setToken(null);
+    setToken('');
     localStorage.removeItem('token');
     router.push('/login');
   }, [router, setToken]);
 
-  const fetchUserDetails = useCallback(async () => {
-    if (!token) {
-      handleLogout();
-      return;
-    }
-
+  const fetchDashboardData = useCallback(async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/api/user`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      setUser(response.data);
-    } catch (error) {
-      console.error('Erro ao buscar informações do usuário:', error);
-      handleLogout();
-    } finally {
+      const [entriesResponse, exitsResponse, alertsResponse, userResponse] =
+        await Promise.all([
+          axios.get(`${API_BASE_URL}/api/products/entries`, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          axios.get(`${API_BASE_URL}/api/products/exits`, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          axios.get(`${API_BASE_URL}/api/products/alerts`, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          axios.get(`${API_BASE_URL}/api/auth/user`, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+        ]);
+
+      setEntries(entriesResponse.data);
+      setExits(exitsResponse.data);
+      setAlerts(alertsResponse.data);
+      setUser(userResponse.data);
       setLoadingUser(false);
-    }
-  }, [API_BASE_URL, token, handleLogout]);
-
-  const fetchProducts = useCallback(async () => {
-    if (!token) {
-      handleLogout();
-      return;
-    }
-
-    try {
-      const response = await axios.get<Product[]>(`${API_BASE_URL}/api/products`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      setProducts(response.data || []);
     } catch (error) {
-      console.error('Erro ao buscar produtos:', error);
-    } finally {
-      setLoadingProducts(false);
-    }
-  }, [API_BASE_URL, token, handleLogout]);
+      console.error('Erro ao carregar dados do Dashboard:', error);
 
-  useIdleTimeout({
-    timeout: 15 * 60 * 1000, // 15 minutos
-    onTimeout: handleLogout,
-  });
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 404) {
+          console.error('Recurso não encontrado:', error.config?.url);
+        } else {
+          console.error('Erro de API:', error.message);
+        }
+      }
+    }
+  }, [API_BASE_URL, token]);
 
   useEffect(() => {
-    if (!token) {
-      handleLogout();
+    if (token) {
+      fetchDashboardData();
     } else {
-      fetchUserDetails();
-      fetchProducts();
+      handleLogout();
     }
-  }, [token, fetchUserDetails, fetchProducts, handleLogout]);
+  }, [token, fetchDashboardData, handleLogout]);
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-100">
-      {/* Cabeçalho Superior */}
-      <header className="flex items-center justify-between bg-white shadow p-4 w-full">
-        <div className="flex items-center space-x-4">
-        <Logo className="w-12 h-8 sm:w-16 sm:h-10 lg:w-20 lg:h-14" />
-        <div>
-            <h1 className="text-xl font-bold text-gray-800">Nome da Empresa</h1>
-            <p className="text-sm text-gray-600">CNPJ: 00.000.000/0000-00</p>
-          </div>
-        </div>
-        <div className="text-right">
-          {loadingUser ? (
-            <p>Carregando informações do usuário...</p>
-          ) : user ? (
-            <>
-              <p className="text-gray-800 font-medium">Usuário: {user.nome}</p>
-              <p className="text-sm text-gray-600">Nível: {user.nivel}</p>
-              <p className="text-sm text-gray-600">
-                Último Login:{' '}
-                {new Intl.DateTimeFormat('pt-BR', {
-                  year: 'numeric',
-                  month: '2-digit',
-                  day: '2-digit',
-                  hour: '2-digit',
-                  minute: '2-digit',
-                  second: '2-digit',
-                  timeZone: 'America/Sao_Paulo',
-                }).format(new Date(user.last_login))}
-              </p>
-            </>
-          ) : (
-            <p className="text-red-500">Erro ao carregar informações do usuário.</p>
+    <div className="flex min-h-screen bg-gray-100">
+      {/* Menu lateral */}
+      <aside className="w-16 bg-white shadow-lg flex flex-col items-center py-6">
+        {/* TODO Resolver o tamanho do Logo */}
+        <Logo className="w-10 h-10 sm:w-12 sm:h-12 lg:w-16 lg:h-16" />{' '}
+        <nav className="mt-10 flex flex-col space-y-6">
+          <AiOutlineHome
+            size={24}
+            className="text-gray-600 hover:text-blue-500 cursor-pointer"
+            onClick={() => router.push('/dashboard')}
+            title="Início"
+          />
+          <AiOutlineDownload
+            size={24}
+            className="text-gray-600 hover:text-blue-500 cursor-pointer"
+            onClick={() => router.push('/entries')}
+            title="Entradas"
+          />
+          <AiOutlineUpload
+            size={24}
+            className="text-gray-600 hover:text-blue-500 cursor-pointer"
+            onClick={() => router.push('/exits')}
+            title="Saídas"
+          />
+        </nav>
+        <div className="mt-auto space-y-6">
+          <AiOutlineUser
+            size={24}
+            className="text-gray-600 hover:text-blue-500 cursor-pointer"
+            onClick={() => router.push('/profile')}
+            title="Perfil"
+          />
+          {user?.nivel === 'Supervisor' && (
+            <AiOutlineSetting
+              size={24}
+              className="text-gray-600 hover:text-blue-500 cursor-pointer"
+              onClick={() => router.push('/settings')}
+              title="Configurações"
+            />
           )}
+          <button
+            className="flex flex-col items-center text-gray-600 hover:text-red-500"
+            onClick={handleLogout}
+            title="Sair"
+          >
+            <AiOutlineLogout size={24} />
+            <span className="text-xs mt-2">Sair</span>
+          </button>
         </div>
-      </header>
+      </aside>
 
-      {/* Estrutura Principal */}
-      <div className="flex flex-1">
-        {/* Menu Lateral */}
-        <aside className="w-20 bg-white shadow-lg flex flex-col items-center py-6 min-h-full">
-          <AiOutlineHome size={24} className="mb-6 text-gray-600 hover:text-blue-500 cursor-pointer" />
-          <AiOutlineSetting size={24} className="mb-6 text-gray-600 hover:text-blue-500 cursor-pointer" />
-          <AiOutlineUser size={24} className="mb-6 text-gray-600 hover:text-blue-500 cursor-pointer" />
-          <div className="mt-auto">
-            <button
-              className="flex flex-col items-center text-gray-600 hover:text-red-500"
-              onClick={handleLogout}
-            >
-              <AiOutlineLogout size={24} />
-              <span className="text-xs mt-2">Sair</span>
-            </button>
+      {/* Conteúdo principal */}
+      <div className="flex-1 flex flex-col">
+        {/* Cabeçalho */}
+        <header className="bg-white shadow p-4 flex justify-between items-center text-xs lg:text-sm">
+          <div>
+            <h1 className="font-bold text-gray-800">Nome da Empresa</h1>
+            <p className="text-gray-600 hidden sm:block">
+              CNPJ: 00.000.000/0000-00
+            </p>
           </div>
-        </aside>
+          <div className="text-right">
+            {loadingUser ? (
+              <p className="text-gray-600">Carregando dados do usuário...</p>
+            ) : user ? (
+              <>
+                <p className="text-gray-800 font-medium">{user.nome}</p>
+                <p className="text-gray-600">Nível: {user.nivel}</p>
+                <p className="text-gray-600 hidden sm:block">
+                  Último Login:{' '}
+                  {new Intl.DateTimeFormat('pt-BR', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    timeZone: 'America/Sao_Paulo',
+                  }).format(new Date(user.last_login))}
+                </p>
+              </>
+            ) : (
+              <p className="text-gray-600">Carregando...</p>
+            )}
+          </div>
+        </header>
 
-        {/* Conteúdo Principal */}
-        <main className="flex-1 p-6 overflow-auto">
-          <h2 className="text-2xl font-bold text-gray-800">Bem-vindo à Dashboard</h2>
-          {loadingProducts ? (
-            <p className="text-gray-600 mt-4">Carregando produtos...</p>
-          ) : products.length > 0 ? (
-            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 mt-4">
-              {products.map((product) => (
-                <div key={product.id} className="bg-white p-4 rounded shadow">
-                  <h3 className="text-lg font-bold">{product.name}</h3>
-                  <p>Estoque: {product.stock}</p>
-                  <p>
-                    Preço:{' '}
-                    {isNaN(Number(product.price)) ? 'Preço inválido' : `R$ ${Number(product.price).toFixed(2)}`}
-                  </p>
-                </div>
-              ))}
+        {/* Conteúdo do Dashboard */}
+        <main className="flex-1 p-4 grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {/* Últimas Entradas: */}
+          <section className="bg-white p-4 rounded shadow">
+            <h2 className="text-lg font-bold mb-2">Últimas Entradas</h2>
+            <ul>
+              {entries.length > 0 ? (
+                entries.map((entry, index) => (
+                  <li key={index} className="border-b py-2">
+                    {entry.name} - Quantidade: {entry.quantity} • Data:{' '}
+                    {new Date(entry.created_at).toLocaleDateString('pt-BR', {
+                      day: '2-digit',
+                      month: '2-digit',
+                      year: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
+                  </li>
+                ))
+              ) : (
+                <p className="text-gray-600">Nenhuma entrada registrada.</p>
+              )}
+            </ul>
+          </section>
+          {/* Últimas Saídas: */}
+          <section className="bg-white p-4 rounded shadow">
+            <h2 className="text-lg font-bold mb-2">Últimas Saídas</h2>
+            <ul>
+              {exits.length > 0 ? (
+                exits.map((exit, index) => (
+                  <li key={index} className="border-b py-2">
+                    {exit.name} - Quantidade: {exit.quantity} • Data:{' '}
+                    {new Date(exit.created_at).toLocaleDateString('pt-BR', {
+                      day: '2-digit',
+                      month: '2-digit',
+                      year: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
+                  </li>
+                ))
+              ) : (
+                <p className="text-gray-600">Nenhuma saída registrada.</p>
+              )}
+            </ul>
+          </section>
+          {/* Alertas */}
+          <section className="bg-white p-4 rounded shadow lg:col-span-2">
+            <div className="flex items-center mb-2">
+              <GrAlert className="text-yellow-600 mr-2" size={20} />
+              <h2 className="text-lg font-bold">Alertas!</h2>
             </div>
-          ) : (
-            <p className="text-gray-600 mt-4">Nenhum produto encontrado.</p>
-          )}
+            <ul>
+              {alerts.length > 0 ? (
+                alerts.map((alert, index) => (
+                  <li key={index} className="border-b py-2 text-yellow-600">
+                    {alert.name} - Estoque: {alert.quantity} (Mínimo:{' '}
+                    {alert.min_stock})
+                  </li>
+                ))
+              ) : (
+                <p className="text-gray-600">Nenhum alerta no momento.</p>
+              )}
+            </ul>
+          </section>
         </main>
       </div>
     </div>
