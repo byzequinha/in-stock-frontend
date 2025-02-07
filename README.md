@@ -1,79 +1,55 @@
-# InStock - Sistema de Controle de Estoque
+# In Stock - B
 
-InStock é um sistema de controle de estoque funcional, desenvolvido com o objetivo de gerenciar produtos, usuários e níveis de acesso de forma simples e eficiente. Este projeto foi desenvolvido utilizando **React**, **TypeScript**, **Next.js** no frontend, e conta com integração ao backend para autenticação e gerenciamento de dados.
+Um sistema de controle de estoque eficiente, com autenticação baseada em JWT, CRUD completo para gerenciamento de usuários e validações robustas. Desenvolvido com Node.js, Express, TypeScript e testes automatizados.
 
-Projeto para avaliação de [Rodolfo Mori](https://www.linkedin.com/in/rodolfomori/) para a formação MBA Code Masters do [DevClub](https://www.linkedin.com/school/dev-club-devs/posts/?feedView=all).
+---
 
-## 🚀 Tecnologias Utilizadas
+## Sumário
+- [Sobre o Projeto](#sobre-o-projeto)
+- [Tecnologias Utilizadas](#tecnologias-utilizadas)
+- [Configuração e Instalação](#configuração-e-instalação)
+- [Endpoints Disponíveis](#endpoints-disponíveis)
+- [Testes Automatizados](#testes-automatizados)
+- [Backup e Restauração do Banco de Dados](#backup-e-restauração-do-banco-de-dados)
+- [Próximos Passos](#próximos-passos)
 
-### Frontend
+---
 
-- **React** com **Next.js**
-- **TypeScript**
-- **Tailwind CSS** para estilização
-- **Axios** para integração com APIs
-- **Prettier** e **ESLint** para padronização de código
-- **Zustand** para gerenciamento de estado
+## Sobre o Projeto
 
-### Backend
+O **In Stock** é uma aplicação backend para controle de estoque, com foco em flexibilidade, segurança e usabilidade. Atualmente, oferece CRUD completo para gerenciar usuários e produtos, autenticação segura com JWT, validações robustas usando Joi e suporte para controle hierárquico (Supervisor, Usuário, etc.).
 
-- **Node.js** com **Express**
-- **TypeScript**
-- **JWT** para autenticação
-- **bcrypt** para criptografia de senhas
-- Integração via API REST
+---
 
-### Banco de Dados
+## Tecnologias Utilizadas
+- **Node.js**: Ambiente de execução JavaScript
+- **Express**: Framework web para criar APIs RESTful
+- **TypeScript**: Tipagem estática para JavaScript
+- **PostgreSQL**: Banco de dados relacional
+- **JWT (JSON Web Tokens)**: Autenticação segura
+- **Docker & Docker Compose**: Contêinerização para deploy e desenvolvimento
+- **Joi**: Validações de entrada de dados
+- **Jest**: Framework de testes automatizados
+- **Swagger**: Documentação e testes de endpoints da API
+- **Bcrypt**: Criptografia de senhas
+- **CORS**: Middleware para configuração de CORS
 
-- **PostgreSQL** em container Docker
-- Migrations para versionamento do banco
+---
 
-## 🌟 Funcionalidades Implementadas
+## Configuração e Instalação
 
-### Autenticação e Segurança
+### 🔧 Instalação e Configuração
 
-- Login por **Matrícula** e **Senha**
-- Logout automático após 1 hora de inatividade
-- Redirecionamento para tela de login se o token estiver ausente ou inválido
-- Criptografia de senhas com bcrypt
-- Proteção de rotas baseada em níveis de acesso
+Antes de iniciar o frontend, é necessário configurar e rodar o backend do projeto. Siga os passos do repositório do backend para configurá-lo corretamente:
 
-### Perfil de Usuário
-
-- Visualização e edição do nome do usuário
-- Alteração de senha com validação da senha atual
-- Exibição da matrícula do usuário
-- Feedback visual durante operações
-- Tratamento de erros com mensagens amigáveis
-
-### Gerenciamento de Usuários (Supervisores)
-
-- Criação de novos usuários
-- Definição de nível de acesso (Usuário/Supervisor)
-- Listagem de usuários cadastrados
-- Validações de dados e feedback em tempo real
-
-### Dashboard
-
-- Exibição de **Nome da Empresa**, **CNPJ**, **Nome do Usuário**, e **Nível de Acesso**
-- Menus horizontais para navegação
-- Menus rápidos no `aside` esquerdo com ícones
-- Layout responsivo e organizado
-
-### Outras Funcionalidades
-
-- Organização modular de componentes, páginas e serviços
-- Configuração de variáveis de ambiente para facilitar o gerenciamento da API
-- Arquitetura pronta para expansão e integração de novas funcionalidades
-- Sistema de logs para rastreamento de operações
-
-## 🔧 Instalação e Configuração
+🔗 **Backend**: [https://github.com/byzequinha/in-stock-backend](https://github.com/byzequinha/in-stock-backend)
 
 ### Requisitos
-
 - **Node.js** (v16 ou superior)
 - **npm** ou **yarn**
 - **Docker** (para rodar o backend ou o banco de dados)
+
+
 
 ### Instalação do Frontend
 
