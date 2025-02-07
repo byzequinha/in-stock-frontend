@@ -82,6 +82,14 @@ Antes de iniciar o frontend, é necessário configurar e rodar o backend do proj
    ```
    http://localhost:3000
    ```
+6. Usuários de Teste do Projeto:
+
+   ```bash
+   Matricula: 123456
+   Senha: senha123  ou admin123  (Supervisor)
+   Matricula: 654321
+   Senha: senha123               (Usuário)
+   ```
 
 ## 🗂️ Estrutura de Pastas
 
