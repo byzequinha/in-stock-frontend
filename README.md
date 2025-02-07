@@ -1,4 +1,4 @@
-# In Stock - B
+# In Stock - Frontend
 
 Um sistema de controle de estoque eficiente, com autenticação baseada em JWT, CRUD completo para gerenciamento de usuários e validações robustas. Desenvolvido com Node.js, Express, TypeScript e testes automatizados.
 
